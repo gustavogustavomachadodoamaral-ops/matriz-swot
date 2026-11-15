@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prisma Consultoria · Matriz SWOT</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f5f6f8;--card:#fff;--tx:#1b2330;--mu:#5d6878;--bd:#dde1e8;--pr:#1f4e8c;--prt:#fff;
+--S:#e3f4ea;--W:#fdeaea;--O:#e6effb;--T:#fff3df;--Sc:#1d7a46;--Wc:#b3261e;--Oc:#1f4e8c;--Tc:#a85d00}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10151d;--card:#18202b;--tx:#e8ecf2;--mu:#9aa6b8;--bd:#2a3442;--pr:#6aa2ec;--prt:#0c1220;
+--S:#17301f;--W:#3a1c1c;--O:#16263d;--T:#3a2a12;--Sc:#6fd69a;--Wc:#ff8f86;--Oc:#8ab8f5;--Tc:#ffb85c}}
+:root[data-theme="dark"]{--bg:#10151d;--card:#18202b;--tx:#e8ecf2;--mu:#9aa6b8;--bd:#2a3442;--pr:#6aa2ec;--prt:#0c1220;
+--S:#17301f;--W:#3a1c1c;--O:#16263d;--T:#3a2a12;--Sc:#6fd69a;--Wc:#ff8f86;--Oc:#8ab8f5;--Tc:#ffb85c}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{background:var(--pr);color:var(--prt);padding:14px 20px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+header h1{margin:0;font-size:18px}header small{opacity:.85;display:block;font-weight:400}
+main{max-width:1100px;margin:0 auto;padding:16px}
+select,input,textarea,button{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:8px 10px}
+button{cursor:pointer}button.p{background:var(--pr);color:var(--prt);border-color:var(--pr)}
+button.x{border:0;background:none;color:var(--mu);padding:2px 6px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+nav{display:flex;gap:6px;margin:14px 0;overflow-x:auto}
+nav button{white-space:nowrap}nav button.on{background:var(--pr);color:var(--prt);border-color:var(--pr)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:640px){.grid{grid-template-columns:1fr}}
+.q{border-radius:12px;padding:12px;border:1px solid var(--bd)}
+.q h3{margin:0;font-size:16px}.q small{color:var(--mu)}
+.q ul{list-style:none;padding:0;margin:8px 0}
+.q li{display:flex;justify-content:space-between;gap:6px;background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:6px 8px;margin-bottom:6px}
+.q .add{display:flex;gap:6px}.q .add input{flex:1;min-width:0}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:12px}
+.wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:760px}
+th,td{text-align:left;padding:6px;border-bottom:1px solid var(--bd);font-size:13px;vertical-align:top}
+td input,td select{width:100%;padding:5px 6px;font-size:13px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:12px}
+.kpi b{display:block;font-size:26px}.kpi span{color:var(--mu);font-size:13px}
+.prog{height:10px;background:var(--bd);border-radius:6px;overflow:hidden;margin-top:6px}.prog i{display:block;height:100%;background:var(--pr)}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:10px}
+.form label{font-size:12px;color:var(--mu);display:block}
+.rep h2{color:var(--pr);margin:0}.rep .hd{display:flex;justify-content:space-between;border-bottom:3px solid var(--pr);padding-bottom:8px;margin-bottom:12px;gap:8px;flex-wrap:wrap}
+.muted{color:var(--mu)}
+@media print{header,nav,.noprint{display:none!important}body{background:#fff;color:#000}.card{break-inside:avoid;border-color:#bbb}:root{--card:#fff;--tx:#000;--bd:#ccc;--pr:#1f4e8c}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Prisma Consultoria<small>Matriz SWOT · diagnóstico estratégico padronizado</small></h1>
+  <div class="bar">
+    <select id="cli" onchange="sel(this.value)" aria-label="Cliente"></select>
+    <button onclick="novo()">+ Cliente</button>
+  </div>
+</header>
+<main>
+  <nav id="nav"></nav>
+  <div id="v"></div>
+</main>
+<script>
+const Q={S:['Forças','Interno · positivo'],W:['Fraquezas','Interno · negativo'],O:['Oportunidades','Externo · positivo'],T:['Ameaças','Externo · negativo']};
+const TABS=[['m','Matriz SWOT'],['a','Plano de ação'],['d','Painel'],['r','Relatório']];
+const uid=()=>Math.random().toString(36).slice(2,9);
+const brl=n=>(+n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let st=load(),tab='m';
+function load(){try{const r=localStorage.getItem('swot-prisma');if(r)return JSON.parse(r)}catch(e){}
+ const id=uid();return{cur:id,clients:[{id,name:'Padaria Bom Grão (exemplo)',
+ swot:{S:['Produto artesanal de qualidade','Clientela fiel no bairro'],W:['Sem presença digital','Gestão de estoque manual'],O:['Entregas por aplicativo','Parcerias com cafés locais'],T:['Rede de supermercados com padaria','Alta no preço da farinha']},
+ actions:[{id:uid(),what:'Criar perfil e catálogo no WhatsApp Business',q:'O',who:'Marina',due:'2026-12-10',how:'Treinamento e catálogo de 20 itens',plan:800,exec:500,pct:60},
+ {id:uid(),what:'Planilha de controle de estoque',q:'W',who:'Carlos',due:'2026-12-20',how:'Modelo padrão + treinamento da equipe',plan:400,exec:0,pct:10}]}]}}
+function save(){try{localStorage.setItem('swot-prisma',JSON.stringify(st))}catch(e){}}
+const C=()=>st.clients.find(c=>c.id===st.cur)||st.clients[0];
+function sel(id){st.cur=id;save();draw()}
+function novo(){const n=prompt('Nome do cliente:');if(!n||!n.trim())return;const id=uid();st.clients.push({id,name:n.trim(),swot:{S:[],W:[],O:[],T:[]},actions:[]});st.cur=id;save();draw()}
+function addI(k){const i=document.getElementById('in'+k);const v=i.value.trim();if(!v)return;C().swot[k].push(v);save();draw()}
+function delI(k,i){C().swot[k].splice(i,1);save();draw()}
+function addA(){const g=x=>document.getElementById(x).value;const w=g('fw').trim();if(!w){alert('Descreva a ação.');return}
+ C().actions.push({id:uid(),what:w,q:g('fq'),who:g('fo'),due:g('fd'),how:g('fh'),plan:+g('fp')||0,exec:+g('fe')||0,pct:0});save();draw()}
+function upA(id,f,v){const a=C().actions.find(x=>x.id===id);a[f]=['plan','exec','pct'].includes(f)?Math.max(0,+v||0):v;if(f==='pct')a.pct=Math.min(100,a.pct);save();if(tab!=='a')draw();else draw(true)}
+function delA(id){const c=C();c.actions=c.actions.filter(a=>a.id!==id);save();draw()}
+function delC(){if(st.clients.length<2){alert('Mantenha ao menos um cliente.');return}if(!confirm('Excluir este cliente?'))return;st.clients=st.clients.filter(c=>c.id!==st.cur);st.cur=st.clients[0].id;save();draw()}
+function stats(c){const n=c.actions.length,pct=n?c.actions.reduce((s,a)=>s+a.pct,0)/n:0,
+ plan=c.actions.reduce((s,a)=>s+a.plan,0),exec=c.actions.reduce((s,a)=>s+a.exec,0);return{n,pct,plan,exec,done:c.actions.filter(a=>a.pct>=100).length}}
+function matriz(c,ro){return`<div class="grid">${Object.keys(Q).map(k=>`<div class="q" style="background:var(--${k});border-color:var(--${k}c)"><h3 style="color:var(--${k}c)">${Q[k][0]}</h3><small>${Q[k][1]}</small><ul>${c.swot[k].map((t,i)=>`<li><span>${esc(t)}</span>${ro?'':`<button class="x" onclick="delI('${k}',${i})" aria-label="Remover">✕</button>`}</li>`).join('')||'<li class="muted">Nenhum item</li>'}</ul>${ro?'':`<div class="add"><input id="in${k}" placeholder="Novo item…" onkeydown="if(event.key==='Enter')addI('${k}')"><button class="p" onclick="addI('${k}')">Add</button></div>`}</div>`).join('')}</div>`}
+function tabela(c,ro){const qo=v=>Object.keys(Q).map(k=>`<option value="${k}" ${k===v?'selected':''}>${Q[k][0]}</option>`).join('');
+ return`<div class="wrap"><table><thead><tr><th>Ação</th><th>Quadrante</th><th>Responsável</th><th>Prazo</th><th>Método</th><th>Previsto</th><th>Executado</th><th>% concl.</th>${ro?'':'<th></th>'}</tr></thead><tbody>${c.actions.map(a=>ro?`<tr><td>${esc(a.what)}</td><td>${Q[a.q][0]}</td><td>${esc(a.who)}</td><td>${a.due?a.due.split('-').reverse().join('/'):'—'}</td><td>${esc(a.how)}</td><td>${brl(a.plan)}</td><td>${brl(a.exec)}</td><td>${a.pct}%</td></tr>`:
+ `<tr><td><input value="${esc(a.what)}" onchange="upA('${a.id}','what',this.value)"></td><td><select onchange="upA('${a.id}','q',this.value)">${qo(a.q)}</select></td><td><input value="${esc(a.who)}" onchange="upA('${a.id}','who',this.value)"></td><td><input type="date" value="${a.due}" onchange="upA('${a.id}','due',this.value)"></td><td><input value="${esc(a.how)}" onchange="upA('${a.id}','how',this.value)"></td><td><input type="number" min="0" value="${a.plan}" onchange="upA('${a.id}','plan',this.value)"></td><td><input type="number" min="0" value="${a.exec}" onchange="upA('${a.id}','exec',this.value)"></td><td><input type="number" min="0" max="100" value="${a.pct}" onchange="upA('${a.id}','pct',this.value)"></td><td><button class="x" onclick="delA('${a.id}')" aria-label="Excluir">✕</button></td></tr>`).join('')||`<tr><td colspan="9" class="muted">Nenhuma ação cadastrada.</td></tr>`}</tbody></table></div>`}
+function chart(c){const A=c.actions;if(!A.length)return'<p class="muted">Cadastre ações para ver o gráfico.</p>';
+ const mx=Math.max(1,...A.flatMap(a=>[a.plan,a.exec])),h=26,W=560;
+ return`<div class="wrap"><svg viewBox="0 0 ${W} ${A.length*h*2+30}" width="100%" role="img" aria-label="Orçamento previsto versus executado" style="min-width:420px;font-size:11px">${A.map((a,i)=>{const y=i*h*2+4,lab=esc(a.what.length>26?a.what.slice(0,25)+'…':a.what);
+ return`<text x="0" y="${y+11}" fill="currentColor">${lab}</text><rect x="170" y="${y}" width="${a.plan/mx*(W-260)}" height="11" rx="3" style="fill:var(--pr)"/><text x="${176+a.plan/mx*(W-260)}" y="${y+10}" fill="currentColor">${brl(a.plan)}</text><rect x="170" y="${y+13}" width="${a.exec/mx*(W-260)}" height="11" rx="3" style="fill:var(--Tc)"/><text x="${176+a.exec/mx*(W-260)}" y="${y+23}" fill="currentColor">${brl(a.exec)}</text>`}).join('')}<rect x="170" y="${A.length*h*2+8}" width="10" height="10" style="fill:var(--pr)"/><text x="185" y="${A.length*h*2+17}" fill="currentColor">Previsto</text><rect x="250" y="${A.length*h*2+8}" width="10" height="10" style="fill:var(--Tc)"/><text x="265" y="${A.length*h*2+17}" fill="currentColor">Executado</text></svg></div>`}
+function kpis(s){const d=s.plan?s.exec/s.plan*100:0;return`<div class="kpis"><div class="card kpi"><b>${s.pct.toFixed(0)}%</b><span>Conclusão média dos planos de ação</span><div class="prog"><i style="width:${s.pct}%"></i></div></div><div class="card kpi"><b>${s.done}/${s.n}</b><span>Ações concluídas</span></div><div class="card kpi"><b>${brl(s.plan)}</b><span>Orçamento previsto</span></div><div class="card kpi"><b>${brl(s.exec)}</b><span>Executado (${d.toFixed(0)}% do previsto)</span><div class="prog"><i style="width:${Math.min(100,d)}%;background:var(--Tc)"></i></div></div></div>`}
+function view(){const c=C(),s=stats(c);
+ if(tab==='m')return`<div class="card"><b>Diagnóstico de ${esc(c.name)}</b><p class="muted" style="margin:4px 0 0">Registre os fatores internos (forças e fraquezas) e externos (oportunidades e ameaças).</p></div>`+matriz(c);
+ if(tab==='a')return`<div class="card"><b>Nova ação</b><div class="form" style="margin-top:8px"><div style="grid-column:1/-1"><label>O que será feito</label><input id="fw" style="width:100%"></div><div><label>Quadrante</label><select id="fq">${Object.keys(Q).map(k=>`<option value="${k}">${Q[k][0]}</option>`).join('')}</select></div><div><label>Responsável</label><input id="fo"></div><div><label>Prazo</label><input id="fd" type="date"></div><div><label>Método (como)</label><input id="fh"></div><div><label>Custo previsto (R$)</label><input id="fp" type="number" min="0"></div><div><label>Custo executado (R$)</label><input id="fe" type="number" min="0"></div></div><button class="p" onclick="addA()">Adicionar ação</button></div><div class="card">${tabela(c)}</div>`;
+ if(tab==='d')return kpis(s)+`<div class="card"><b>Orçamento por ação</b>${chart(c)}</div><div class="card"><b>Itens por quadrante</b><div class="bar" style="margin-top:8px">${Object.keys(Q).map(k=>`<span class="q" style="background:var(--${k});color:var(--${k}c);padding:6px 12px"><b>${c.swot[k].length}</b> ${Q[k][0]}</span>`).join('')}</div></div>`;
+ return`<div class="bar noprint" style="margin-bottom:10px"><button class="p" onclick="window.print()">Imprimir / salvar PDF</button></div><div class="card rep"><div class="hd"><div><h2>Prisma Consultoria</h2><span class="muted">Relatório executivo · Matriz SWOT</span></div><div style="text-align:right"><b>${esc(c.name)}</b><br><span class="muted">${new Date().toLocaleDateString('pt-BR')}</span></div></div><h3>1. Diagnóstico estratégico</h3>${matriz(c,1)}<h3>2. Indicadores</h3>${kpis(s)}<h3>3. Plano de ação</h3>${tabela(c,1)}<h3>4. Orçamento previsto vs. executado</h3>${chart(c)}</div>`}
+function draw(keepFocus){const a=document.activeElement,id=a&&a.id;
+ document.getElementById('cli').innerHTML=st.clients.map(c=>`<option value="${c.id}" ${c.id===st.cur?'selected':''}>${esc(c.name)}</option>`).join('');
+ document.getElementById('nav').innerHTML=TABS.map(t=>`<button class="${t[0]===tab?'on':''}" onclick="tab='${t[0]}';draw()">${t[1]}</button>`).join('')+`<button onclick="delC()" style="margin-left:auto">Excluir cliente</button>`;
+ document.getElementById('v').innerHTML=view();}
+draw();
+</script>
+</body>
+</html>
